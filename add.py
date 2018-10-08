@@ -48,18 +48,27 @@ import time
 #     t = threading.Thread(target=do,args=(i,number,thread))
 #     t.start()
 
-#单线程添加数据（一次1条）
+
+#单线程添加数据
 # conn = MySQLdb.connect(host='127.0.0.1', user='root', passwd='123456', port=3306)
 # conn.autocommit(True)
-# number = 50000
-# for i in range(number):
+# number = 500000
+# every = 50000
+# a = range(number)
+# for i in range(number/every):
+#     curdata = a[i*every:(i+1)*every]
 #     cur = conn.cursor()
 #     ct = time.time()
 #     local_time = time.localtime(ct)
 #     data_head = time.strftime("%H:%M:%S", local_time)
 #     data_secs = (ct - int(ct)) * 1000
 #     time_stamp = "%s.%03d" % (data_head, data_secs)
-#     sql = 'use test_TiDB;INSERT INTO test(id,time) VALUES (' + str(i) + ',' + "\'" + time_stamp + "\'" + ');'
+#     sql = 'use test_TiDB;INSERT INTO test(id,time) VALUES '
+#     for j in curdata:
+#         if j != curdata[-1]:
+#             sql += '(' + str(j) + ',' + "\'" + time_stamp + "\'" + '),'
+#         else:
+#             sql += '(' + str(j) + ',' + "\'" + time_stamp + "\'" + ');'
 #     try:
 #         # 执行sql语句
 #         cur.execute(sql)
@@ -70,71 +79,27 @@ import time
 #         # Rollback in case there is any error
 #         conn.rollback()
 
-#单线程添加数据（一次10条）
-# conn = MySQLdb.connect(host='127.0.0.1', user='root', passwd='123456', port=3306)
-# conn.autocommit(True)
-# number = 50000
-# for i in range(number):
-#     cur = conn.cursor()
-#     ct = time.time()
-#     local_time = time.localtime(ct)
-#     data_head = time.strftime("%H:%M:%S", local_time)
-#     data_secs = (ct - int(ct)) * 1000
-#     time_stamp = "%s.%03d" % (data_head, data_secs)
-#     sql = 'use test_TiDB;INSERT INTO test(id,time) VALUES (' + str(i*10) + ',' + "\'" + time_stamp + "\'" + '),(' + str(i*10+1) + ',' + "\'" + time_stamp + "\'" + '),(' + str(i*10+2) + ',' + "\'" + time_stamp + "\'" + '),(' + str(i*10+3) + ',' + "\'" + time_stamp + "\'" + '),(' + str(i*10+4) + ',' + "\'" + time_stamp + "\'" + '),(' + str(i*10+5) + ',' + "\'" + time_stamp + "\'" + '),(' + str(i*10+6) + ',' + "\'" + time_stamp + "\'" + '),(' + str(i*10+7) + ',' + "\'" + time_stamp + "\'" + '),(' + str(i*10+8) + ',' + "\'" + time_stamp + "\'" + '),(' + str(i*10+9) + ',' + "\'" + time_stamp + "\'" + ');'
-#     # print(sql)
-#     try:
-#         # 执行sql语句
-#         cur.execute(sql)
-#         cur.close()
-#         # 提交到数据库执行
-#         conn.commit()
-#     except:
-#         # Rollback in case there is any error
-#         conn.rollback()
 
-#多线程添加数据(一次1条）
-def do(id,num,th):
-    conn = MySQLdb.connect(host='127.0.0.1', user='root', passwd='123456', port=3306)
-    conn.autocommit(True)
-    a = range(num)
-    for i in a[id*len(a)/th:(id+1)*len(a)/th]:
-        cur = conn.cursor()
-        ct = time.time()
-        local_time = time.localtime(ct)
-        data_head = time.strftime("%H:%M:%S", local_time)
-        data_secs = (ct - int(ct)) * 1000
-        time_stamp = "%s.%03d" % (data_head, data_secs)
-        sql = 'use test_TiDB;INSERT INTO test(id,time) VALUES (' + str(i) + ',' + "\'" + time_stamp + "\'" + ');'
-        try:
-            # 执行sql语句
-            cur.execute(sql)
-            cur.close()
-            # 提交到数据库执行
-            conn.commit()
-        except:
-            # Rollback in case there is any error
-            conn.rollback()
-
-thread = 10
-number = 100000
-for i in range(thread):
-    t = threading.Thread(target=do,args=(i,number,thread))
-    t.start()
-
-#多线程添加数据(一次10条）
-# def do(id,num,th):
+#多线程添加数据
+# def do(id,num,th,_every):
 #     conn = MySQLdb.connect(host='127.0.0.1', user='root', passwd='123456', port=3306)
 #     conn.autocommit(True)
 #     a = range(num)
-#     for i in a[id*len(a)/th:(id+1)*len(a)/th]:
+#     curdata = a[id*num/th:(id+1)*num/th]
+#     for i in range(num/th/_every):
+#         curnum = curdata[i*_every:(i+1)*_every]
 #         cur = conn.cursor()
 #         ct = time.time()
 #         local_time = time.localtime(ct)
 #         data_head = time.strftime("%H:%M:%S", local_time)
 #         data_secs = (ct - int(ct)) * 1000
 #         time_stamp = "%s.%03d" % (data_head, data_secs)
-#         sql = 'use test_TiDB;INSERT INTO test(id,time) VALUES (' + str(i*10) + ',' + "\'" + time_stamp + "\'" + '),(' + str(i*10+1) + ',' + "\'" + time_stamp + "\'" + '),(' + str(i*10+2) + ',' + "\'" + time_stamp + "\'" + '),(' + str(i*10+3) + ',' + "\'" + time_stamp + "\'" + '),(' + str(i*10+4) + ',' + "\'" + time_stamp + "\'" + '),(' + str(i*10+5) + ',' + "\'" + time_stamp + "\'" + '),(' + str(i*10+6) + ',' + "\'" + time_stamp + "\'" + '),(' + str(i*10+7) + ',' + "\'" + time_stamp + "\'" + '),(' + str(i*10+8) + ',' + "\'" + time_stamp + "\'" + '),(' + str(i*10+9) + ',' + "\'" + time_stamp + "\'" + ');'
+#         sql = 'use test_TiDB;INSERT INTO test(id,time) VALUES '
+#         for j in curnum:
+#             if j != curnum[-1]:
+#                 sql += '(' + str(j) + ',' + "\'" + time_stamp + "\'" + '),'
+#             else:
+#                 sql += '(' + str(j) + ',' + "\'" + time_stamp + "\'" + ');'
 #         # print(sql)
 #         try:
 #             # 执行sql语句
@@ -147,7 +112,8 @@ for i in range(thread):
 #             conn.rollback()
 #
 # thread = 10
-# number = 10000
+# number = 500000
+# every = 50000
 # for i in range(thread):
-#     t = threading.Thread(target=do,args=(i,number,thread))
+#     t = threading.Thread(target=do,args=(i,number,thread,every))
 #     t.start()

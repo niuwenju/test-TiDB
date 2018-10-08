@@ -9,12 +9,14 @@ def test():
     conn.autocommit(True)
     # a = cur.execute("use test_TiDB;select * from test where id = 49999;")
     timee = None
+    number = 500000L
     while timee == None:
         cur = conn.cursor()
-        if cur.execute("use test_TiDB;select * from test where id = 99999;") == 0:
+        cur.execute("use test_TiDB;select count(*) as value from test;")
+        result = cur.fetchall()
+        if result != ((number,),):
             timee = None
         else:
-            # print(1)
             ct = time.time()
             local_time = time.localtime(ct)
             data_head = time.strftime("%H:%M:%S", local_time)
